@@ -12,7 +12,7 @@
  */
 
 var Emitter = require('nomocas-utils/lib/emitter'),
-	dom = require('nomocas-webutils/lib//elem'),
+	dom = require('nomocas-webutils/lib/elem'),
 	elem = dom.elem;
 
 // full info on actions list there : https://developer.mozilla.org/en-US/docs/Web/API/Document/execCommand
