@@ -43,7 +43,7 @@ wysiwyg.on('update', function(e) {
 
 ```
 
-It's avaiable as global MiniWysiwyg in the browser when UMD momdule is loaded from script tags.
+It's avaiable as global MiniWysiwyg in the browser when UMD module is loaded from script tags.
 
 
 ## Licence
