@@ -11,7 +11,7 @@ Absolutly minimal wysiwyg and its menu.
 
 
 It was made because :
-- 99,99 % of the time, we only need a few set of actions and not a full editor that produce ugly and complexe html
+- 99,99 % of the time, we only need a few set of actions and not a full editor that produces ugly and complexe html
 - and almost all other wysiwyg are really really heavy for just doing that. This one could not be lighter.
 
 
