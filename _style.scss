@@ -1,0 +1,51 @@
+/**
+ * SASS Tools chain : Should use auto-prefixer
+ */
+
+div.wysiwyg-menu {
+    $button-size: 25px;
+    position: fixed;
+    display: none;
+    transition: all .3s ease-in-out;
+    ul {
+        padding: 5px;
+        border-radius: 5px;
+        background-color: #eee;
+        display: inline-block;
+        li {
+            display: inline-block;
+            margin-right: 3px;
+            list-style: none;
+            button {
+                background-color: #fff;
+                border-radius: 5px;
+                width: $button-size;
+                height: $button-size;
+                text-align: center;
+                line-height: $button-size;
+                padding: 0;
+                color: #aaa;
+                &:hover {
+                    color: #666;
+                }
+            }
+        }
+    }
+    .wysiwyg-anchor-ui {
+        padding: 5px;
+        background-color: #eee;
+        border-radius: 5px;
+        width: 235px;
+        select {
+            text-align: center;
+            width: 4rem;
+            font-size: 0.85em;
+            color: #555;
+        }
+        input {
+            color: #333;
+            width: 100%;
+            margin-bottom: 5px;
+        }
+    }
+}
