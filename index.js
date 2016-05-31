@@ -175,7 +175,7 @@ Wysiwyg.prototype.destroy = function(value) {
 };
 Wysiwyg.prototype.clean = function() {
 	Wysiwyg.cleanHTML(this.editedNode);
-	if (this.editedNode.innerHTML === '<br>')
+	if (this.editedNode.textContent === '<br>')
 		this.editedNode.innerHTML = '';
 	return this;
 };
