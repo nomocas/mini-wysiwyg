@@ -109,13 +109,13 @@ function Wysiwyg(editedNode) {
 		},
 		// double click on editedNode : center menu on selection
 		dblclick = function(e) {
-			if (!self.editedNode.contentEditable || self.editedNode.getAttribute('contenteditable') == 'false')
+			if (!Wysiwyg.currentlyFocused || !self.editedNode.contentEditable)
 				return;
 			clearTimeout(willHideMenu);
 			moveMenuToSelection();
 		},
 		mouseUp = function() {
-			if (!self.editedNode.contentEditable || self.editedNode.getAttribute('contenteditable') == 'false')
+			if (!Wysiwyg.currentlyFocused || !self.editedNode.contentEditable)
 				return;
 			if (window.getSelection().toString()) {
 				clearTimeout(willHideMenu);
@@ -123,7 +123,7 @@ function Wysiwyg(editedNode) {
 			}
 		},
 		click = function() {
-			if (!self.editedNode.contentEditable || self.editedNode.getAttribute('contenteditable') == 'false')
+			if (!Wysiwyg.menuInstance || !self.editedNode.contentEditable)
 				return;
 			if (Wysiwyg.menuInstance.el.style.display !== 'none' && !window.getSelection().toString())
 				willHideMenu = setTimeout(function() {
@@ -148,7 +148,6 @@ Wysiwyg.prototype = new Emitter();
 // check value change : dispatch event
 Wysiwyg.prototype.update = function() {
 	var val = this.editedNode.innerHTML;
-	// console.log('Wysiwiyg : proto.update : ', this._value, val)
 	if (val === this._value)
 		return;
 	this._value = val;
@@ -176,6 +175,8 @@ Wysiwyg.prototype.destroy = function(value) {
 };
 Wysiwyg.prototype.clean = function() {
 	Wysiwyg.cleanHTML(this.editedNode);
+	if (this.editedNode.innerHTML === '<br>')
+		this.editedNode.innerHTML = '';
 	return this;
 };
 
@@ -327,15 +328,12 @@ WysiwygMenu.prototype.moveToSelection = function() {
 	this.el.style.top = (rect.bottom + 8) + 'px';
 	this.show();
 	// check if parent is anchor
-	// console.log('move to sel : focus : start : ', focus.tagName)
 	while (focus && focus.tagName !== 'A' && focus !== Wysiwyg.currentlyFocused.editedNode)
 		focus = focus.parentNode;
-	// console.log('move to sel : focus : ', focus.tagName)
 	if (focus && focus.tagName === 'A')
 		Wysiwyg.menuInstance.showAnchorManager(focus);
 	else
 		Wysiwyg.menuInstance.hideAnchorManager();
-	// console.log('menu moved : ', rect.top, rect.left, this.el)
 };
 
 WysiwygMenu.prototype.show = function() {
