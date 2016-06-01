@@ -185,6 +185,15 @@ function refocus() {
 		Wysiwyg.currentlyFocused.editedNode.focus();
 }
 
+Wysiwyg.update = function() {
+	if (Wysiwyg.currentlyFocused) {
+		// Wysiwyg.currentlyFocused.editedNode.blur();
+		Wysiwyg.currentlyFocused.clean();
+		Wysiwyg.currentlyFocused.update();
+		// Wysiwyg.currentlyFocused = null;
+	}
+}
+
 /**
  * apply specified action  (bold, italic, ...) to current selection in any contentEditable node.
  * @param  {String} action the action to apply
@@ -232,7 +241,6 @@ Wysiwyg.format = function(action) {
 
 Wysiwyg.currentlyFocused = null;
 
-var bodyClickHandler;
 
 var WysiwygMenu = function(options) {
 	options = options || {};
@@ -292,13 +300,23 @@ var WysiwygMenu = function(options) {
 	this.targetSelect = select;
 	this.hrefInput = hrefInput;
 
-	bodyClickHandler = function(e) {
-		var menu = e.target;
-		while (menu && menu !== div && (Wysiwyg.currentlyFocused ? (menu !== Wysiwyg.currentlyFocused.editedNode) : true))
-			menu = menu.parentNode;
-		if (!menu)
-			self.hide();
-	};
+	var bodyClickHandler = function(e) {
+			var menu = e.target;
+			while (menu && menu !== div && (Wysiwyg.currentlyFocused ? (menu !== Wysiwyg.currentlyFocused.editedNode) : true))
+				menu = menu.parentNode;
+			if (!menu)
+				self.hide();
+		},
+		mousedownHandler = function(e) {
+			var parent = e.target.parentNode,
+				grandPa = parent.parentNode;
+			if (grandPa === div || grandPa === ul || grandPa === anchorUI || parent === div || parent === ul || parent === anchorUI)
+				return;
+			if (Wysiwyg.currentlyFocused && e.target !== Wysiwyg.currentlyFocused.editedNode) {
+				Wysiwyg.update();
+				// self.hide();
+			}
+		};
 
 	this.clearAnchorManager = function() {
 		this.currentAnchor = null;
@@ -308,14 +326,21 @@ var WysiwygMenu = function(options) {
 	};
 
 	document.body.addEventListener('click', bodyClickHandler);
+	document.body.addEventListener('mousedown', mousedownHandler);
+
+	this.destroyers = [function() {
+		document.body.removeEventListener('click', bodyClickHandler);
+		document.body.removeEventListener('mousedown', mousedownHandler);
+	}];
+
 	this.currentAnchorParent = null;
 }
 
 WysiwygMenu.prototype = new Emitter();
 
 WysiwygMenu.prototype.destroy = function() {
-	document.body.removeEventListener('click', bodyClickHandler);
-	// let garbage collector do the job
+	this.destroyers.forEach(function(d) { d(); });
+	// let garbage collector do the rest
 };
 
 WysiwygMenu.prototype.moveToSelection = function() {
