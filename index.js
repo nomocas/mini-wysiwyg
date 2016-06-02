@@ -105,8 +105,8 @@ function Wysiwyg(editedNode) {
 			Wysiwyg.currentlyFocused = self;
 			clearTimeout(willBlur);
 		},
-		// double click on editedNode : center menu on selection
 		dblclick = function(e) {
+			// double click on editedNode : center menu on selection
 			if (!Wysiwyg.currentlyFocused || !self.editedNode.contentEditable)
 				return;
 			clearTimeout(willHideMenu);
@@ -126,19 +126,27 @@ function Wysiwyg(editedNode) {
 			if (Wysiwyg.menuInstance.el.style.display !== 'none' && !window.getSelection().toString())
 				willHideMenu = setTimeout(function() {
 					Wysiwyg.menuInstance.hide();
-				}, 300)
+				}, 300);
+		},
+		input = function(e) {
+			if (e.target.innerHTML === '' || e.target.innerHTML === '<br>')
+				e.target.classList.add('empty');
+			else
+				e.target.classList.remove('empty');
 		};
-	editedNode.addEventListener('blur', blur);
 	editedNode.addEventListener('focus', focus);
+	editedNode.addEventListener('blur', blur);
 	editedNode.addEventListener('dblclick', dblclick);
 	editedNode.addEventListener('mouseup', mouseUp);
 	editedNode.addEventListener('click', click);
+	editedNode.addEventListener('input', input);
 	this._destroyer = function() {
 		editedNode.removeEventListener('focus', focus);
 		editedNode.removeEventListener('blur', blur);
 		editedNode.removeEventListener('dblclick', dblclick);
 		editedNode.removeEventListener('mouseup', mouseUp);
 		editedNode.removeEventListener('click', click);
+		editedNode.removeEventListener('input', input);
 	};
 }
 
@@ -173,8 +181,8 @@ Wysiwyg.prototype.destroy = function(value) {
 };
 Wysiwyg.prototype.clean = function() {
 	Wysiwyg.cleanHTML(this.editedNode);
-	if (this.editedNode.textContent === '<br>')
-		this.editedNode.innerHTML = '';
+	if (this.editedNode.innerHTML === '<br>')
+		this.editedNode.textContent = '';
 	return this;
 };
 
