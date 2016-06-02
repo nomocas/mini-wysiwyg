@@ -6,9 +6,7 @@
  * Known bugs :
  *
  * - Firefox and p tags : executing createLink and list (ordered or not) as p child don't work and throw a NS_ERROR : 
- * 		=> work around : use anything else than a p tag.
- *
- * - Firefox : anchor panel is never shown back when selecting anchor in text. (should be debugable)
+ * 		=> work around : use anything else than a p tag as editable element.
  */
 
 var Emitter = require('nomocas-utils/lib/emitter'),
@@ -346,17 +344,29 @@ WysiwygMenu.prototype.destroy = function() {
 WysiwygMenu.prototype.moveToSelection = function() {
 
 	var sel = window.getSelection(),
-		focus = sel.anchorNode;
+		range = sel.getRangeAt(0),
+		anchor = sel.anchorNode,
+		focus = sel.focusNode;
 
-	var rect = sel.getRangeAt(0).getBoundingClientRect();
+	var rect = range.getBoundingClientRect();
 	this.el.style.left = (rect.left + rect.width / 2) + 'px';
 	this.el.style.top = (rect.bottom + 8) + 'px';
 	this.show();
-	// check if parent is anchor
-	while (focus && focus.tagName !== 'A' && focus !== Wysiwyg.currentlyFocused.editedNode)
-		focus = focus.parentNode;
-	if (focus && focus.tagName === 'A')
-		Wysiwyg.menuInstance.showAnchorManager(focus);
+
+	// Firefox case when doubleclick-on-word selection : 
+	// as A tags should be selected precisly to be edited : anchor and focus node should be element (no pure text at start or end)
+	if (anchor.nodeType === 1 && focus.nodeType === 1) // element nodes : selection offset is number of child after start (or before end)
+	{
+		var start = anchor.childNodes[sel.anchorOffset],
+			end = focus.childNodes[sel.focusOffset - 1];
+		if (start.tagName === 'A' && start === end)
+			anchor = start;
+	}
+	// find first A : (anchor or ancestor)
+	while (anchor && anchor.tagName !== 'A' && anchor !== Wysiwyg.currentlyFocused.editedNode)
+		anchor = anchor.parentNode;
+	if (anchor && anchor.tagName === 'A')
+		Wysiwyg.menuInstance.showAnchorManager(anchor);
 	else
 		Wysiwyg.menuInstance.hideAnchorManager();
 };
