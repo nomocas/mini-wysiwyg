@@ -247,7 +247,6 @@ Wysiwyg.format = function(action) {
 
 Wysiwyg.currentlyFocused = null;
 
-
 var WysiwygMenu = function(options) {
 	options = options || {};
 	var div = elem('div', { 'class': options.menuClass ||  'wysiwyg-menu' }),
@@ -307,6 +306,8 @@ var WysiwygMenu = function(options) {
 	this.hrefInput = hrefInput;
 
 	var bodyClickHandler = function(e) {
+			if (!Wysiwyg.menuInstance.shown())
+				return;
 			var menu = e.target;
 			while (menu && menu !== div && (Wysiwyg.currentlyFocused ? (menu !== Wysiwyg.currentlyFocused.editedNode) : true))
 				menu = menu.parentNode;
@@ -314,13 +315,14 @@ var WysiwygMenu = function(options) {
 				self.hide();
 		},
 		mousedownHandler = function(e) {
-			var parent = e.target.parentNode,
-				grandPa = parent.parentNode;
-			if (grandPa === div || grandPa === ul || grandPa === anchorUI || parent === div || parent === ul || parent === anchorUI)
+			if (!Wysiwyg.currentlyFocused)
 				return;
-			if (Wysiwyg.currentlyFocused && e.target !== Wysiwyg.currentlyFocused.editedNode) {
+			var parent = e.target;
+			while (parent && parent !== Wysiwyg.currentlyFocused.editedNode && parent !== div)
+				parent = parent.parentNode;
+			if (!parent) {
 				Wysiwyg.update();
-				// self.hide();
+				self.hide();
 			}
 		};
 
@@ -378,7 +380,9 @@ WysiwygMenu.prototype.moveToSelection = function() {
 	else
 		Wysiwyg.menuInstance.hideAnchorManager();
 };
-
+WysiwygMenu.prototype.shown = function() {
+	return this.el.style.display !== 'none';
+};
 WysiwygMenu.prototype.show = function() {
 	dom.show(this.el);
 };
