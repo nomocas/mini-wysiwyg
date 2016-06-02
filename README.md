@@ -17,7 +17,7 @@ It was made because :
 
 Known bugs :
 - Firefox and p tags : executing createLink and list (ordered or not) as p child don't work and throw a NS_ERROR : 
-	=> work around : use anything else than a p tag.
+	=> work around : use anything else than a p tag as editable element.
 
 
 Well tested in Chrome and Safari.
