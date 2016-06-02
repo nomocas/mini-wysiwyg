@@ -18,7 +18,6 @@ It was made because :
 Known bugs :
 - Firefox and p tags : executing createLink and list (ordered or not) as p child don't work and throw a NS_ERROR : 
 	=> work around : use anything else than a p tag.
-- Firefox : anchor panel is never shown back when selecting anchor in text. (should be debugable)
 
 
 Well tested in Chrome and Safari.
