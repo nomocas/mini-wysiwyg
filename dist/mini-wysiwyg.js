@@ -7,13 +7,11 @@
  * Known bugs :
  *
  * - Firefox and p tags : executing createLink and list (ordered or not) as p child don't work and throw a NS_ERROR : 
- * 		=> work around : use anything else than a p tag.
- *
- * - Firefox : anchor panel is never shown back when selecting anchor in text. (should be debugable)
+ * 		=> work around : use anything else than a p tag as editable element.
  */
 
 var Emitter = require('nomocas-utils/lib/emitter'),
-	dom = require('nomocas-webutils/lib//elem'),
+	dom = require('nomocas-webutils/lib/elem'),
 	elem = dom.elem;
 
 // full info on actions list there : https://developer.mozilla.org/en-US/docs/Web/API/Document/execCommand
@@ -108,15 +106,15 @@ function Wysiwyg(editedNode) {
 			Wysiwyg.currentlyFocused = self;
 			clearTimeout(willBlur);
 		},
-		// double click on editedNode : center menu on selection
 		dblclick = function(e) {
-			if (!self.editedNode.contentEditable || self.editedNode.getAttribute('contenteditable') == 'false')
+			// double click on editedNode : center menu on selection
+			if (!Wysiwyg.currentlyFocused || !self.editedNode.contentEditable)
 				return;
 			clearTimeout(willHideMenu);
 			moveMenuToSelection();
 		},
 		mouseUp = function() {
-			if (!self.editedNode.contentEditable || self.editedNode.getAttribute('contenteditable') == 'false')
+			if (!Wysiwyg.currentlyFocused || !self.editedNode.contentEditable)
 				return;
 			if (window.getSelection().toString()) {
 				clearTimeout(willHideMenu);
@@ -124,24 +122,32 @@ function Wysiwyg(editedNode) {
 			}
 		},
 		click = function() {
-			if (!self.editedNode.contentEditable || self.editedNode.getAttribute('contenteditable') == 'false')
+			if (!Wysiwyg.menuInstance || !self.editedNode.contentEditable)
 				return;
 			if (Wysiwyg.menuInstance.el.style.display !== 'none' && !window.getSelection().toString())
 				willHideMenu = setTimeout(function() {
 					Wysiwyg.menuInstance.hide();
-				}, 300)
+				}, 300);
+		},
+		input = function(e) {
+			if (e.target.innerHTML === '' || e.target.innerHTML === '<br>')
+				e.target.classList.add('empty');
+			else
+				e.target.classList.remove('empty');
 		};
-	editedNode.addEventListener('blur', blur);
 	editedNode.addEventListener('focus', focus);
+	editedNode.addEventListener('blur', blur);
 	editedNode.addEventListener('dblclick', dblclick);
 	editedNode.addEventListener('mouseup', mouseUp);
 	editedNode.addEventListener('click', click);
+	editedNode.addEventListener('input', input);
 	this._destroyer = function() {
 		editedNode.removeEventListener('focus', focus);
 		editedNode.removeEventListener('blur', blur);
 		editedNode.removeEventListener('dblclick', dblclick);
 		editedNode.removeEventListener('mouseup', mouseUp);
 		editedNode.removeEventListener('click', click);
+		editedNode.removeEventListener('input', input);
 	};
 }
 
@@ -149,7 +155,6 @@ Wysiwyg.prototype = new Emitter();
 // check value change : dispatch event
 Wysiwyg.prototype.update = function() {
 	var val = this.editedNode.innerHTML;
-	// console.log('Wysiwiyg : proto.update : ', this._value, val)
 	if (val === this._value)
 		return;
 	this._value = val;
@@ -177,12 +182,23 @@ Wysiwyg.prototype.destroy = function(value) {
 };
 Wysiwyg.prototype.clean = function() {
 	Wysiwyg.cleanHTML(this.editedNode);
+	if (this.editedNode.innerHTML === '<br>')
+		this.editedNode.textContent = '';
 	return this;
 };
 
 function refocus() {
 	if (Wysiwyg.currentlyFocused && Wysiwyg.currentlyFocused.editedNode !== document.activeElement)
 		Wysiwyg.currentlyFocused.editedNode.focus();
+}
+
+Wysiwyg.update = function() {
+	if (Wysiwyg.currentlyFocused) {
+		// Wysiwyg.currentlyFocused.editedNode.blur();
+		Wysiwyg.currentlyFocused.clean();
+		Wysiwyg.currentlyFocused.update();
+		// Wysiwyg.currentlyFocused = null;
+	}
 }
 
 /**
@@ -231,8 +247,6 @@ Wysiwyg.format = function(action) {
 };
 
 Wysiwyg.currentlyFocused = null;
-
-var bodyClickHandler;
 
 var WysiwygMenu = function(options) {
 	options = options || {};
@@ -292,13 +306,26 @@ var WysiwygMenu = function(options) {
 	this.targetSelect = select;
 	this.hrefInput = hrefInput;
 
-	bodyClickHandler = function(e) {
-		var menu = e.target;
-		while (menu && menu !== div && (Wysiwyg.currentlyFocused ? (menu !== Wysiwyg.currentlyFocused.editedNode) : true))
-			menu = menu.parentNode;
-		if (!menu)
-			self.hide();
-	};
+	var bodyClickHandler = function(e) {
+			if (!Wysiwyg.menuInstance.shown())
+				return;
+			var menu = e.target;
+			while (menu && menu !== div && (Wysiwyg.currentlyFocused ? (menu !== Wysiwyg.currentlyFocused.editedNode) : true))
+				menu = menu.parentNode;
+			if (!menu)
+				self.hide();
+		},
+		mousedownHandler = function(e) {
+			if (!Wysiwyg.currentlyFocused)
+				return;
+			var parent = e.target;
+			while (parent && parent !== Wysiwyg.currentlyFocused.editedNode && parent !== div)
+				parent = parent.parentNode;
+			if (!parent) {
+				Wysiwyg.update();
+				self.hide();
+			}
+		};
 
 	this.clearAnchorManager = function() {
 		this.currentAnchor = null;
@@ -308,37 +335,55 @@ var WysiwygMenu = function(options) {
 	};
 
 	document.body.addEventListener('click', bodyClickHandler);
+	document.body.addEventListener('mousedown', mousedownHandler);
+
+	this.destroyers = [function() {
+		document.body.removeEventListener('click', bodyClickHandler);
+		document.body.removeEventListener('mousedown', mousedownHandler);
+	}];
+
 	this.currentAnchorParent = null;
 }
 
 WysiwygMenu.prototype = new Emitter();
 
 WysiwygMenu.prototype.destroy = function() {
-	document.body.removeEventListener('click', bodyClickHandler);
-	// let garbage collector do the job
+	this.destroyers.forEach(function(d) { d(); });
+	// let garbage collector do the rest
 };
 
 WysiwygMenu.prototype.moveToSelection = function() {
 
 	var sel = window.getSelection(),
-		focus = sel.anchorNode;
+		range = sel.getRangeAt(0),
+		anchor = sel.anchorNode,
+		focus = sel.focusNode;
 
-	var rect = sel.getRangeAt(0).getBoundingClientRect();
+	var rect = range.getBoundingClientRect();
 	this.el.style.left = (rect.left + rect.width / 2) + 'px';
 	this.el.style.top = (rect.bottom + 8) + 'px';
 	this.show();
-	// check if parent is anchor
-	// console.log('move to sel : focus : start : ', focus.tagName)
-	while (focus && focus.tagName !== 'A' && focus !== Wysiwyg.currentlyFocused.editedNode)
-		focus = focus.parentNode;
-	// console.log('move to sel : focus : ', focus.tagName)
-	if (focus && focus.tagName === 'A')
-		Wysiwyg.menuInstance.showAnchorManager(focus);
+
+	// Firefox case when doubleclick-on-word selection : 
+	// as A tags should be selected precisly to be edited : anchor and focus node should be element (no pure text at start or end)
+	if (anchor.nodeType === 1 && focus.nodeType === 1) // element nodes : selection offset is number of child after start (or before end)
+	{
+		var start = anchor.childNodes[sel.anchorOffset],
+			end = focus.childNodes[sel.focusOffset - 1];
+		if (start.tagName === 'A' && start === end)
+			anchor = start;
+	}
+	// find first A : (anchor or ancestor)
+	while (anchor && anchor.tagName !== 'A' && anchor !== Wysiwyg.currentlyFocused.editedNode)
+		anchor = anchor.parentNode;
+	if (anchor && anchor.tagName === 'A')
+		Wysiwyg.menuInstance.showAnchorManager(anchor);
 	else
 		Wysiwyg.menuInstance.hideAnchorManager();
-	// console.log('menu moved : ', rect.top, rect.left, this.el)
 };
-
+WysiwygMenu.prototype.shown = function() {
+	return this.el.style.display !== 'none';
+};
 WysiwygMenu.prototype.show = function() {
 	dom.show(this.el);
 };
@@ -379,6 +424,21 @@ Wysiwyg.destroyMenu = function() {
 	Wysiwyg.menuInstance.destroy();
 	Wysiwyg.menuInstance = null;
 };
+
+Wysiwyg.replacer = function(node) {
+	console.log('replacer : ', node.tagName)
+	switch (node.tagName) {
+		case 'B':
+			var newNode = document.createElement('span');
+			newNode.classList.add('my-bold');
+			return newNode;
+		case 'I':
+			var newNode = document.createElement('span');
+			newNode.classList.add('my-italic');
+			return newNode;
+	}
+	return node; // no replacement will be done. 
+}
 
 /*
  * Clean produced HTML (to avoid differences from browsers implementations).
@@ -435,6 +495,16 @@ Wysiwyg.cleanHTML = function(node) {
 			// remove any style attribute
 			if (child.getAttribute('style'))
 				child.removeAttribute('style');
+			if (Wysiwyg.replacer) {
+				var newNode = Wysiwyg.replacer(child);
+				if (newNode && newNode !== child) {
+					node.insertBefore(newNode, child);
+					var children = [].slice.call(child.childNodes);
+					for (var j = 0, lenj = children.length; j < lenj; ++j)
+						newNode.appendChild(children[j]);
+					node.removeChild(child);
+				}
+			}
 		}
 	}
 	return node;
@@ -442,7 +512,7 @@ Wysiwyg.cleanHTML = function(node) {
 
 module.exports = Wysiwyg;
 
-},{"nomocas-utils/lib/emitter":2,"nomocas-webutils/lib//elem":3}],2:[function(require,module,exports){
+},{"nomocas-utils/lib/emitter":2,"nomocas-webutils/lib/elem":3}],2:[function(require,module,exports){
 /**  @author Gilles Coomans <gilles.coomans@gmail.com> */
 
 /**
