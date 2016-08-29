@@ -92,6 +92,32 @@ var menu = MiniWysiwyg.menu({
 document.body.appendChild(menu.el);
 ```
 
+## API
+
+Statics :
+
+- Wysiwyg.menu(opt) : return (and produce on first call) the menu manager (a singleton)
+- Wysiwyg.destroyMenu() : destroy menu (including manager and dom's elements)
+- Wysiwyg.update() : check value change on currently focused editable node : dispatch update event if changed.
+- Wysiwyg.format(actionName) : apply specified action  (bold, italic, ...) to current selection in any contentEditable node.
+- Wysiwyg.cleanHTML(node) : Clean inner HTML of provided node (to avoid differences from browsers implementations).
+
+Instance :
+
+- wysiwyg.update() : check value change : dispatch update event if changed.
+- wysiwyg.html(htmlString) : set html content. If no htmlString is provided : return current html (after clean).
+- wysiwyg.destroy() : destroy wysiwyg instance and remove binded events. Lets editable node in dom's tree
+- wysiwyg.clean() : force clean.
+- wysiwyg.format(actionName)
+
+Menu manager :
+
+- menu.hide()
+- menu.show()
+- menu.showAnchorManager()
+- menu.hideAnchorManager()
+- menu.moveToSelection() : move menu near current selection
+
 
 ## Licence
 

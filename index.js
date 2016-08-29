@@ -87,6 +87,10 @@ function moveMenuToSelection() {
 	Wysiwyg.menuInstance.moveToSelection();
 }
 
+/*************************************************************************
+ * Wysiwyg Class
+ *************************************************************************/
+
 function Wysiwyg(editedNode) {
 	this.editedNode = (typeof editedNode === 'string') ? document.querySelector(editedNode) : editedNode;
 	this._value = this.editedNode.innerHTML;
@@ -151,7 +155,7 @@ function Wysiwyg(editedNode) {
 }
 
 Wysiwyg.prototype = new Emitter();
-// check value change : dispatch event
+// check value change : dispatch event if needed
 Wysiwyg.prototype.update = function() {
 	var val = this.editedNode.innerHTML;
 	if (val === this._value)
@@ -246,6 +250,10 @@ Wysiwyg.format = function(action) {
 };
 
 Wysiwyg.currentlyFocused = null;
+
+/*************************************************************************
+ * Wysiwyg Menu
+ *************************************************************************/
 
 var WysiwygMenu = function(options) {
 	options = options || {};
