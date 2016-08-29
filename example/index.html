@@ -67,7 +67,7 @@
 </head>
 
 <body>
-    <div id='editable'> This is editable (select something to make menu appearing.)</div>
+    <div id="editable"> This is editable (select something to make menu appearing.)</div>
     <script type="text/javascript" src="../dist/mini-wysiwyg.min.js"></script>
     <script type="text/javascript">
     // add menu somewhere
@@ -75,7 +75,7 @@
 
     // make a node editable
     var node = document.getElementById('editable');
-    node.setAttribute('contenteditable', true); // togggle contenteditable to allow edition and menu handling.
+    node.setAttribute('contenteditable', true); // toggle contenteditable to allow edition and menu handling.
     var wysiwyg = new MiniWysiwyg(node);
 
     // for the moment : only update on blur (which clean html before firing event)
