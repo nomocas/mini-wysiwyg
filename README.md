@@ -20,7 +20,7 @@ Known bugs :
 	=> work around : use anything else than a p tag as editable element.
 
 
-Well tested in Chrome and Safari.
+Well tested in Chrome, Safari and Firefox.
 
 ## Usage
 
@@ -33,7 +33,7 @@ document.body.appendChild(MiniWysiwyg.menu().el);
 // make a node editable
 var node = document.querySelector('...');
 node.setAttribute('contenteditable', true); // togggle contenteditable to allow edition and menu handling.
-var wysiwyg = new MiniWysiwyg(node);
+var wysiwyg = new MiniWysiwyg(node); // instanciate a wysiwyg for each editable node
 
 // for the moment : only update on blur (which clean html before firing event)
 wysiwyg.on('update', function(e) {
@@ -43,6 +43,49 @@ wysiwyg.on('update', function(e) {
 ```
 
 It's avaiable as global MiniWysiwyg in the browser when UMD module is loaded from script tags.
+
+### Replacer
+
+You could define a replacement function to cast produced nodes to what-ever-you-want node.
+
+Example that cast B and I tags to spans with custom classes.
+```javascript
+Wysiwyg.replacer = function(node) {
+	switch (node.tagName) {
+		case 'B':
+			var newNode = document.createElement('span');
+			newNode.classList.add('my-bold');
+			return newNode;
+		case 'I':
+			var newNode = document.createElement('span');
+			newNode.classList.add('my-italic');
+			return newNode;
+	}
+	return; // no replacement will be done.
+};
+```
+
+### Custom icon set 
+
+// example with current icon set.
+```javascript
+var iconsSet = {
+	undo: '<i class="fa fa-undo"></i>',
+	redo: '<i class="fa fa-repeat"></i>',
+	bold: '<i class="fa fa-bold"></i>',
+	italic: '<i class="fa fa-italic"></i>',
+	insertUnorderedList: '<i class="fa fa-list-ul"></i>',
+	insertOrderedList: '<i class="fa fa-list-ol"></i>',
+	'createLink': '<i class="fa fa-link"></i>',
+	'unlink': '<i class="fa fa-unlink"></i>'
+};
+
+// Then, on wysiwyg-menu instanciation
+var menu = MiniWysiwyg.menu({
+	iconsSet:iconsSet
+});
+document.body.appendChild(menu.el);
+```
 
 
 ## Licence
