@@ -19,6 +19,7 @@ div.wysiwyg-menu {
             button {
                 background-color: #fff;
                 border-radius: 5px;
+                border: none;
                 width: $button-size;
                 height: $button-size;
                 text-align: center;
@@ -44,7 +45,7 @@ div.wysiwyg-menu {
         }
         input {
             color: #333;
-            width: 100%;
+            width: calc(100% - 5px);
             margin-bottom: 5px;
         }
     }
