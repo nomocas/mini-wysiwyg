@@ -72,7 +72,7 @@ Wysiwyg.replacer = function(node) {
 
 ### Custom icon set 
 
-// example with current icon set.
+Example with current icon set.
 ```javascript
 var iconsSet = {
 	undo: '<i class="fa fa-undo"></i>',
@@ -81,8 +81,8 @@ var iconsSet = {
 	italic: '<i class="fa fa-italic"></i>',
 	insertUnorderedList: '<i class="fa fa-list-ul"></i>',
 	insertOrderedList: '<i class="fa fa-list-ol"></i>',
-	'createLink': '<i class="fa fa-link"></i>',
-	'unlink': '<i class="fa fa-unlink"></i>'
+	createLink: '<i class="fa fa-link"></i>',
+	unlink: '<i class="fa fa-unlink"></i>'
 };
 
 // Then, on wysiwyg-menu instanciation
