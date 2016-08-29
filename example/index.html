@@ -82,6 +82,23 @@
     wysiwyg.on('update', function(e) {
         console.log('wysiwyg update :', e.detail.value);
     });
+
+    /*
+    // custom bold and italic wrapping (optional)
+    MiniWysiwyg.replacer = function(node) {
+        switch (node.tagName) {
+            case 'B':
+                var newNode = document.createElement('span');
+                newNode.classList.add('my-bold');
+                return newNode;
+            case 'I':
+                var newNode = document.createElement('span');
+                newNode.classList.add('my-italic');
+                return newNode;
+        }
+        return; // no replacement will be done.
+    }; 
+    */
     </script>
 </body>
 
