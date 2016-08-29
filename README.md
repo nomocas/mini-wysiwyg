@@ -22,6 +22,11 @@ Known bugs :
 
 Well tested in Chrome, Safari and Firefox.
 
+
+## Example
+
+Take a look in example folder.
+
 ## Usage
 
 ```javascript
