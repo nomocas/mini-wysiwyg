@@ -479,16 +479,6 @@ Wysiwyg.cleanHTML = function(node) {
 			// remove any style attribute
 			if (child.getAttribute('style'))
 				child.removeAttribute('style');
-			if (Wysiwyg.replacer) {
-				var newNode = Wysiwyg.replacer(child);
-				if (newNode && newNode !== child) {
-					node.insertBefore(newNode, child);
-					var children = [].slice.call(child.childNodes);
-					for (var j = 0, lenj = children.length; j < lenj; ++j)
-						newNode.appendChild(children[j]);
-					node.removeChild(child);
-				}
-			}
 		}
 	}
 	return node;
