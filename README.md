@@ -36,7 +36,7 @@ var MiniWysiwyg = require('mini-wysiwyg');
 document.body.appendChild(MiniWysiwyg.menu().el);
 
 // make a node editable
-var node = document.querySelector('...');
+var node = document.querySelector('...'); // no p or text-area tag
 node.setAttribute('contenteditable', true); // togggle contenteditable to allow edition and menu handling.
 var wysiwyg = new MiniWysiwyg(node); // instanciate a wysiwyg for each editable node
 
