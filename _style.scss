@@ -49,4 +49,69 @@ div.wysiwyg-menu {
             margin-bottom: 5px;
         }
     }
+
+    &.html {
+        ul li button {
+          position: relative;
+
+            i {
+                width: 100%;
+                height: 100%;
+                position: absolute;
+                top: 0;
+                left: 0;
+
+                &:after {
+                    color: black;
+                    left: 50%;
+                    transform: translateX(-50%);
+                    font-style: normal;
+                    position: absolute;
+                }
+
+                // Undo.
+                &.fa-undo:after {
+                    content: '\21BA';
+                }
+
+                // Repeat.
+                &.fa-repeat:after {
+                    content: '\21BB';
+                }
+
+                // Bold.
+                &.fa-bold:after {
+                    content: 'B';
+                    font-weight: bold;
+                }
+
+                // Italic.
+                &.fa-italic:after {
+                    content: 'I';
+                    font-style: italic;
+                }
+
+                // UL.
+                &.fa-list-ul:after {
+                    content: 'UL';
+                }
+
+                // OL.
+                &.fa-list-ol:after {
+                    content: 'OL';
+                }
+
+                // Link.
+                &.fa-link:after {
+                    content: '\1F517';
+                }
+
+                // Un-link.
+                &.fa-unlink:after {
+                    content: '\1F517';
+                    text-decoration: line-through;
+                }
+            }
+        }
+    }
 }
