@@ -25,9 +25,12 @@
     "url": "https://github.com/nomocas/mini-wysiwyg/issues"
   },
   "homepage": "https://github.com/nomocas/mini-wysiwyg",
-  "devDependencies": {},
+  "devDependencies": {
+    "browserify": "^14.3.0",
+    "uglifyjs": "^2.4.10"
+  },
   "dependencies": {
-    "nomocas-utils": "^0.0.7",
-    "nomocas-webutils": "^0.0.5"
+    "nomocas-utils": "^0.3.0",
+    "nomocas-webutils": "^0.0.7"
   }
 }
