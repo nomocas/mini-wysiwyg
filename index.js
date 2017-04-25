@@ -202,7 +202,7 @@ Wysiwyg.update = function() {
 		Wysiwyg.currentlyFocused.update();
 		// Wysiwyg.currentlyFocused = null;
 	}
-}
+};
 
 /**
  * apply specified action  (bold, italic, ...) to current selection in any contentEditable node.
@@ -218,7 +218,7 @@ Wysiwyg.format = function(action) {
 			break;
 		case 'createLink':
 			document.execCommand('createLink', false, 'blabla'); // providing url here doesn't work
-			// We need a hack to force the href.
+			// We need a way to force the href.
 			// It seems that focus node (correctly wrapped with anchor with href at this point) 
 			// will be rewrapped with another anchor (without href) somehow after.
 			// Wait one ms to get final wrapping anchor.
@@ -280,13 +280,13 @@ var WysiwygMenu = function(options) {
 	var self = this;
 	var hrefInput = elem('input', { type: 'text', value: '', placeHolder: 'href (http://...)' }, null, {
 			input: function(e) {
-				var href = e.target.value
+				var href = e.target.value;
 				self.currentAnchor.setAttribute('href', href);
 			}
 		}),
 		titleInput = elem('input', { type: 'text', value: '', placeHolder: 'title' }, null, {
 			input: function(e) {
-				var title = e.target.value
+				var title = e.target.value;
 				self.currentAnchor.setAttribute('title', title);
 			}
 		}),
@@ -350,7 +350,7 @@ var WysiwygMenu = function(options) {
 	}];
 
 	this.currentAnchorParent = null;
-}
+};
 
 WysiwygMenu.prototype = new Emitter();
 
@@ -422,7 +422,7 @@ WysiwygMenu.prototype.hideAnchorManager = function() {
 Wysiwyg.menu = function(options) {
 	if (Wysiwyg.menuInstance)
 		return Wysiwyg.menuInstance;
-	return Wysiwyg.menuInstance = new WysiwygMenu(options);
+	return (Wysiwyg.menuInstance = new WysiwygMenu(options));
 };
 
 Wysiwyg.destroyMenu = function() {
@@ -440,37 +440,59 @@ Wysiwyg.destroyMenu = function() {
 var replacedByContent = /^(?:SPAN|P|DIV)$/,
 	needBR = /^(?:P|DIV)$/;
 
+function replaceTagByContent(child, node) {
+	if (needBR.test(child.tagName)) // for div and  p : insert br before child (as div and p effect).
+		node.insertBefore(elem('br'), child);
+
+	// if there is something interesting in child
+	if (child.textContent) {
+		// recursion to clean sub contents before
+		Wysiwyg.cleanHTML(child);
+
+		// insert child's children before child.
+		// copy childNodes because it will be emptied child by child
+		var children = [].slice.call(child.childNodes);
+		var lenj = children.length;
+		for (var j = 0; j < lenj; ++j)
+			node.insertBefore(children[j], child);
+	}
+
+	// remove div or p or span
+	node.removeChild(child);
+}
+
+function cleanInnerHTML(child, node) {
+	Wysiwyg.cleanHTML(child);
+	// remove any style attribute
+	if (child.getAttribute('style'))
+		child.removeAttribute('style');
+	if (Wysiwyg.replacer) {
+		var newNode = Wysiwyg.replacer(child);
+		if (newNode && newNode !== child) {
+			node.insertBefore(newNode, child);
+			var children = [].slice.call(child.childNodes);
+			var lenj = children.length;
+			for (var j = 0; j < lenj; ++j)
+				newNode.appendChild(children[j]);
+			node.removeChild(child);
+		}
+	}
+}
+
 Wysiwyg.cleanHTML = function(node) {
 	// copy childNodes because original will be modified while looping through procedure below
-	var childNodes = [].slice.call(node.childNodes);
+	var childNodes = [].slice.call(node.childNodes),
+		children, child, j, lenj;
 	for (var i = 0, len = childNodes.length; i < len; ++i) {
-		var child = childNodes[i];
+		child = childNodes[i];
 
 		// not for text nodes or br
 		if (!child.tagName || child.tagName === 'BR')
 			continue;
 
 		// if tag should be replaced by its content (if any). 
-		if (replacedByContent.test(child.tagName)) {
-
-			if (needBR.test(child.tagName)) // for div and  p : insert br before child (as div and p effect).
-				node.insertBefore(elem('br'), child);
-
-			// if there is something interesting in child
-			if (child.textContent) {
-				// recursion to clean sub contents before
-				Wysiwyg.cleanHTML(child);
-
-				// insert child's children before child.
-				// copy childNodes because it will be emptied child by child
-				var children = [].slice.call(child.childNodes);
-				for (var j = 0, lenj = children.length; j < lenj; ++j)
-					node.insertBefore(children[j], child);
-			}
-
-			// remove div or p or span
-			node.removeChild(child);
-		}
+		if (replacedByContent.test(child.tagName))
+			replaceTagByContent(child, node);
 		// for any other tag (but BR) :
 		// if it has no text children ==> it contains a br somewhere (rule tested from FF, Chrome & Safari)
 		// simply replace it with a br
@@ -482,24 +504,11 @@ Wysiwyg.cleanHTML = function(node) {
 			node.removeChild(child);
 		}
 		// or clean inner html and remove style attribute
-		else {
-			Wysiwyg.cleanHTML(child);
-			// remove any style attribute
-			if (child.getAttribute('style'))
-				child.removeAttribute('style');
-			if (Wysiwyg.replacer) {
-				var newNode = Wysiwyg.replacer(child);
-				if (newNode && newNode !== child) {
-					node.insertBefore(newNode, child);
-					var children = [].slice.call(child.childNodes);
-					for (var j = 0, lenj = children.length; j < lenj; ++j)
-						newNode.appendChild(children[j]);
-					node.removeChild(child);
-				}
-			}
-		}
+		else
+			cleanInnerHTML(child, node);
 	}
 	return node;
 };
 
 module.exports = Wysiwyg;
+
