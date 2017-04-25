@@ -6,8 +6,9 @@
   "directories": {},
   "scripts": {
     "dist": "npm run build  && npm run min",
-    "build": "browserify -s MiniWysiwyg index.js > dist/mini-wysiwyg.js",
-    "min": "uglifyjs dist/mini-wysiwyg.js --compress --mangle  -o dist/mini-wysiwyg.min.js"
+    "build": "browserify -s MiniWysiwyg index.js -o dist/mini-wysiwyg.js",
+    "min": "uglifyjs dist/mini-wysiwyg.js --compress --mangle  -o dist/mini-wysiwyg.min.js",
+    "postinstall": "mkdir dist"
   },
   "repository": {
     "type": "git",
@@ -30,7 +31,7 @@
     "uglifyjs": "^2.4.10"
   },
   "dependencies": {
-    "nomocas-utils": "^0.3.0",
+    "nomocas-utils": "^0.3.1",
     "nomocas-webutils": "^0.0.7"
   }
 }
