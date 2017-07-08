@@ -158,7 +158,7 @@ Wysiwyg.prototype = new Emitter();
 // check value change : dispatch event if needed
 Wysiwyg.prototype.update = function() {
 	var val = this.editedNode.innerHTML;
-	if (val === this._value)
+	if (val == this._value)
 		return;
 	this._value = val;
 	var evt = new CustomEvent('update', {
@@ -179,7 +179,8 @@ Wysiwyg.prototype.html = function(value) {
 Wysiwyg.prototype.destroy = function(value) {
 	if (this._destroyer)
 		this._destroyer();
-	this._destroyer = this._value = this.editedNode = null;
+	this._destroyer = this.editedNode = null;
+	this._value = '';
 	if (Wysiwyg.currentlyFocused === this)
 		Wysiwyg.currentlyFocused = null;
 };
