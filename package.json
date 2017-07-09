@@ -1,6 +1,6 @@
 {
   "name": "mini-wysiwyg",
-  "version": "0.1.4",
+  "version": "0.1.5",
   "description": "Minimalistic Wysiwig",
   "main": "index.js",
   "directories": {},
