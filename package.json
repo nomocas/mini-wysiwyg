@@ -7,8 +7,7 @@
   "scripts": {
     "dist": "npm run build  && npm run min",
     "build": "browserify -s MiniWysiwyg index.js -o dist/mini-wysiwyg.js",
-    "min": "uglifyjs dist/mini-wysiwyg.js --compress --mangle  -o dist/mini-wysiwyg.min.js",
-    "postinstall": "mkdir dist"
+    "min": "uglifyjs dist/mini-wysiwyg.js --compress --mangle  -o dist/mini-wysiwyg.min.js"
   },
   "repository": {
     "type": "git",
